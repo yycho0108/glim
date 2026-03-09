@@ -1,11 +1,14 @@
 #include <glim/mapping/async_sub_mapping.hpp>
 
+#include <glim/mapping/callbacks.hpp>
 namespace glim {
 
 AsyncSubMapping::AsyncSubMapping(const std::shared_ptr<glim::SubMappingBase>& sub_mapping) : sub_mapping(sub_mapping) {
   kill_switch = false;
   end_of_sequence = false;
   thread = std::thread([this] { run(); });
+  request_to_publish_submap = false;
+  SubMappingCallbacks::request_to_publish_submap.add([this] { request_to_publish_submap = true; });
 }
 
 AsyncSubMapping::~AsyncSubMapping() {
@@ -84,6 +87,13 @@ void AsyncSubMapping::run() {
     for (const auto& frame : odom_frames) {
       std::vector<EstimationFrame::ConstPtr> marginalized;
       sub_mapping->insert_frame(frame);
+    }
+
+    if (request_to_publish_submap){
+	// NOTE(ycho): seems sort-of unnecessary I guess
+        // std::lock_guard<std::mutex> lock(sub_mapping_mutex);
+        request_to_publish_submap = false;
+	sub_mapping->set_force_create_submap(true);
     }
   }
 

@@ -76,7 +76,13 @@ struct SubMappingCallbacks {
    * @brief SubMap creation callback
    * @param submap  New SubMap
    */
-  static CallbackSlot<void(const SubMap::ConstPtr& submap)> on_new_submap;
+  static CallbackSlot<void(const SubMap::Ptr& submap)> on_new_submap;
+
+  /**
+   * @brief Request SubMapping to publish _current_ submap.
+   * @note  This is a special inverse-direction callback slot
+   */
+  static CallbackSlot<void()> request_to_publish_submap;
 };
 
 /**

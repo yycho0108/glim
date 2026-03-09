@@ -59,6 +59,9 @@ public:
    */
   virtual std::vector<SubMap::Ptr> submit_end_of_sequence() { return std::vector<SubMap::Ptr>(); }
 
+
+  virtual void set_force_create_submap(const bool){}
+
   /**
    * @brief Load a sub mapping module from a shared library
    * @param so_name  Shared library name

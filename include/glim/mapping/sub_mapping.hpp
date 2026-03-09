@@ -66,6 +66,7 @@ public:
   virtual std::vector<SubMap::Ptr> get_submaps() override;
 
   virtual std::vector<SubMap::Ptr> submit_end_of_sequence() override;
+  virtual void set_force_create_submap(const bool) override;
 
 private:
   void insert_keyframe(const int current, const EstimationFrame::ConstPtr& odom_frame);
@@ -98,6 +99,7 @@ private:
   std::vector<SubMap::Ptr> submap_queue;
 
   std::shared_ptr<void> tbb_task_arena;
+  bool force_create_submap;
 };
 
 }  // namespace glim

@@ -12,7 +12,8 @@ CallbackSlot<void(int id, const EstimationFrame::ConstPtr&)> SubMappingCallbacks
 
 CallbackSlot<void(gtsam::NonlinearFactorGraph&, gtsam::Values&)> SubMappingCallbacks::on_optimize_submap;
 CallbackSlot<void(const gtsam_points::LevenbergMarquardtOptimizationStatus&, const gtsam::Values& values)> SubMappingCallbacks::on_optimization_status;
-CallbackSlot<void(const SubMap::ConstPtr&)> SubMappingCallbacks::on_new_submap;
+CallbackSlot<void(const SubMap::Ptr&)> SubMappingCallbacks::on_new_submap;
+CallbackSlot<void()> SubMappingCallbacks::request_to_publish_submap;
 
 // global mapping
 #ifdef GLIM_USE_OPENCV

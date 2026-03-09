@@ -90,6 +90,7 @@ SubMapping::SubMapping(const SubMappingParams& params) : params(params) {
 #ifdef GTSAM_USE_TBB
   tbb_task_arena = std::make_shared<tbb::task_arena>(1);
 #endif
+  force_create_submap = false;
 }
 
 SubMapping::~SubMapping() {}
@@ -321,19 +322,24 @@ void SubMapping::insert_frame(const EstimationFrame::ConstPtr& odom_frame_) {
     odom_frames[odom_frames.size() - 2] = odom_frames[odom_frames.size() - 2]->clone_wo_points();
   }
 
-  auto new_submap = create_submap();
+  auto new_submap = create_submap(force_create_submap);
 
   if (new_submap) {
-    new_submap->id = submap_count++;
-    submap_queue.push_back(new_submap);
+    new_submap->id = submap_count;
     Callbacks::on_new_submap(new_submap);
-
-    odom_frames.clear();
-    keyframes.clear();
-    keyframe_indices.clear();
-    values.reset(new gtsam::Values);
-    graph.reset(new gtsam::NonlinearFactorGraph);
+    if(!force_create_submap){
+      submap_queue.push_back(new_submap);
+      ++submap_count;
+      odom_frames.clear();
+      keyframes.clear();
+      keyframe_indices.clear();
+      values.reset(new gtsam::Values);
+      graph.reset(new gtsam::NonlinearFactorGraph);
+    }
   }
+
+  // Always reset `force_create_submap` I guess?
+  force_create_submap = false;
 }
 
 void SubMapping::insert_keyframe(const int current, const EstimationFrame::ConstPtr& odom_frame) {
@@ -518,6 +524,9 @@ std::vector<SubMap::Ptr> SubMapping::submit_end_of_sequence() {
   }
 
   return submaps;
+}
+void SubMapping::set_force_create_submap(const bool force_create_submap){
+  this->force_create_submap = force_create_submap;
 }
 
 }  // namespace glim
