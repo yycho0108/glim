@@ -322,6 +322,7 @@ void SubMapping::insert_frame(const EstimationFrame::ConstPtr& odom_frame_) {
     odom_frames[odom_frames.size() - 2] = odom_frames[odom_frames.size() - 2]->clone_wo_points();
   }
 
+  std::cout << "FORCE" << force_create_submap << std::endl;
   auto new_submap = create_submap(force_create_submap);
 
   if (new_submap) {
@@ -329,6 +330,7 @@ void SubMapping::insert_frame(const EstimationFrame::ConstPtr& odom_frame_) {
     Callbacks::on_new_submap(new_submap);
     if(!force_create_submap){
       submap_queue.push_back(new_submap);
+      std::cout << "new submap created!! id=" << new_submap->id << std::endl;
       ++submap_count;
       odom_frames.clear();
       keyframes.clear();
@@ -518,6 +520,7 @@ std::vector<SubMap::Ptr> SubMapping::submit_end_of_sequence() {
     auto new_submap = create_submap(true);
 
     if (new_submap) {
+      // std::cout << "end-of-seq" << submap_count << std::endl;
       new_submap->id = submap_count++;
       submaps.push_back(new_submap);
     }
