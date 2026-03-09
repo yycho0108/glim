@@ -322,7 +322,7 @@ void SubMapping::insert_frame(const EstimationFrame::ConstPtr& odom_frame_) {
     odom_frames[odom_frames.size() - 2] = odom_frames[odom_frames.size() - 2]->clone_wo_points();
   }
 
-  std::cout << "FORCE" << force_create_submap << std::endl;
+  // std::cout << "FORCE" << force_create_submap << std::endl;
   auto new_submap = create_submap(force_create_submap);
 
   if (new_submap) {
