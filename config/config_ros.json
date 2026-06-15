@@ -52,7 +52,7 @@
     // IMU config
     "imu_time_offset": 0.0,
     "points_time_offset": 0.0,
-    "acc_scale": 9.80665,
+    "acc_scale": 1.0, //9.80665,
     // TF config
     "imu_frame_id": "imu",
     "lidar_frame_id": "lidar",

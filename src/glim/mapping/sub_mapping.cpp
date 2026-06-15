@@ -323,14 +323,19 @@ void SubMapping::insert_frame(const EstimationFrame::ConstPtr& odom_frame_) {
   }
 
   // std::cout << "FORCE" << force_create_submap << std::endl;
+  // force_create_submap = false;
   auto new_submap = create_submap(force_create_submap);
 
   if (new_submap) {
+
     new_submap->id = submap_count;
+    std::cout << "new submap created!! id=" << new_submap->id << std::endl;
+
     Callbacks::on_new_submap(new_submap);
-    if(!force_create_submap){
+    // if(!force_create_submap){
+    if(0){
       submap_queue.push_back(new_submap);
-      std::cout << "new submap created!! id=" << new_submap->id << std::endl;
+      // std::cout << "new submap created!! id=" << new_submap->id << std::endl;
       ++submap_count;
       odom_frames.clear();
       keyframes.clear();
@@ -426,17 +431,20 @@ SubMap::Ptr SubMapping::create_submap(bool force_create) const {
     return nullptr;
   }
 
-  logger->debug("create_submap");
+  logger->info("create_submap with {} keyframes", keyframes.size());
   // Optimization
-  Callbacks::on_optimize_submap(*graph, *values);
-  gtsam_points::LevenbergMarquardtExtParams lm_params;
-  lm_params.setMaxIterations(20);
-  if (Callbacks::on_optimization_status) {
-    lm_params.callback = [](const gtsam_points::LevenbergMarquardtOptimizationStatus& status, const gtsam::Values& values) { Callbacks::on_optimization_status(status, values); };
-  }
-  gtsam_points::LevenbergMarquardtOptimizerExt optimizer(*graph, *values, lm_params);
-  if (params.enable_optimization) {
+  if(!force_create){
+    Callbacks::on_optimize_submap(*graph, *values);
+  } 
+  
+  if ((!force_create) && params.enable_optimization) {
     try {
+      gtsam_points::LevenbergMarquardtExtParams lm_params;
+      lm_params.setMaxIterations(20);
+      if (Callbacks::on_optimization_status) {
+        lm_params.callback = [](const gtsam_points::LevenbergMarquardtOptimizationStatus& status, const gtsam::Values& values) { Callbacks::on_optimization_status(status, values); };
+      }
+      gtsam_points::LevenbergMarquardtOptimizerExt optimizer(*graph, *values, lm_params);
 #ifdef GTSAM_USE_TBB
       auto arena = static_cast<tbb::task_arena*>(this->tbb_task_arena.get());
       arena->execute([&] {
