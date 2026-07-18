@@ -8,7 +8,7 @@ AsyncSubMapping::AsyncSubMapping(const std::shared_ptr<glim::SubMappingBase>& su
   end_of_sequence = false;
   thread = std::thread([this] { run(); });
   request_to_publish_submap = false;
-  SubMappingCallbacks::request_to_publish_submap.add([this] { request_to_publish_submap = true; });
+  //SubMappingCallbacks::request_to_publish_submap.add([this] { request_to_publish_submap = true; });
 }
 
 AsyncSubMapping::~AsyncSubMapping() {

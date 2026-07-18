@@ -63,7 +63,7 @@ OdometryEstimationIMUParams::OdometryEstimationIMUParams() {
 
   compute_covs = config.param<bool>("odometry_estimation", "compute_covs", false);
 
-  validate_imu = config.param<bool>("odometry_estimation", "validate_imu", true);
+  //validate_imu = config.param<bool>("odometry_estimation", "validate_imu", true);
   save_imu_rate_trajectory = config.param<bool>("odometry_estimation", "save_imu_rate_trajectory", false);
 
   num_threads = config.param<int>("odometry_estimation", "num_threads", 4);

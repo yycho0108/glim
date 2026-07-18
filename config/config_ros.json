@@ -7,6 +7,9 @@
   //
   // --- Points config ---
   // keep_raw_points        : Keep raw points in the map (required for only extension modules)
+  // points_msg_type        : Points message type. "pointcloud2" or "livox_custom"
+  // livox_blind            : Minimum valid Livox range in meters
+  // livox_max_range        : Maximum valid Livox range in meters
   //
   // --- IMU config ---
   // imu_time_offset        : Time offset for IMU data (in seconds)
@@ -49,6 +52,9 @@
     "enable_global_mapping": false,
     // Points config
     "keep_raw_points": false,
+    "points_msg_type": "livox_custom",
+    "livox_blind": 0.0,
+    "livox_max_range": 100.0,
     // IMU config
     "imu_time_offset": 0.0,
     "points_time_offset": 0.0,
@@ -64,11 +70,12 @@
     // Extension modules
     "extension_modules": [
       "libmemory_monitor.so",
-      // "libstandard_viewer.so",
+      //"libstandard_viewer.so",
       "librviz_viewer.so"
       // "libimu_validator.so"
     ],
     // Topics
+    //"imu_topic": "/livox/imu",
     "imu_topic": "/livox/imu",
     "points_topic": "/livox/lidar",
     "image_topic": "/image",

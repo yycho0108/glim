@@ -3,6 +3,9 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <unordered_map>
 #include <spdlog/spdlog.h>
 #include <boost/format.hpp>
 
@@ -12,11 +15,14 @@
 
 #ifdef GLIM_ROS2
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <livox_ros_driver2/msg/custom_msg.hpp>
 namespace glim {
 using PointCloud2 = sensor_msgs::msg::PointCloud2;
 using PointCloud2Ptr = sensor_msgs::msg::PointCloud2::SharedPtr;
 using PointCloud2ConstPtr = sensor_msgs::msg::PointCloud2::ConstSharedPtr;
 using PointField = sensor_msgs::msg::PointField;
+using LivoxCustomMsg = livox_ros_driver2::msg::CustomMsg;
+using LivoxCustomMsgConstPtr = livox_ros_driver2::msg::CustomMsg::ConstSharedPtr;
 
 template <typename Stamp>
 double to_sec(const Stamp& stamp) {
@@ -163,6 +169,14 @@ static RawPoints::Ptr extract_raw_points(const PointCloud2& points_msg, const st
       }
     }
   }
+#if 0
+  auto [min_it, max_it] = std::minmax_element(
+		  raw_points->times.begin(),
+		  raw_points->times.end()
+  );
+  spdlog::info("T {} {}", *min_it, *max_it);
+#endif
+
 
   if (intensity_offset >= 0) {
     raw_points->intensities.resize(num_points);
@@ -238,6 +252,63 @@ static RawPoints::Ptr extract_raw_points(const PointCloud2& points_msg, const st
 static RawPoints::Ptr extract_raw_points(const PointCloud2ConstPtr& points_msg, const std::string& intensity_channel = "intensity") {
   return extract_raw_points(*points_msg, intensity_channel, "");
 }
+
+#ifdef GLIM_ROS2
+static RawPoints::Ptr extract_raw_points(const LivoxCustomMsg& msg, const double blind = 0.0, const double max_range = 100.0) {
+  if (msg.point_num == 0 || msg.points.empty()) {
+    spdlog::warn("empty Livox custom point cloud");
+    return nullptr;
+  }
+
+  const size_t num_points = std::min<size_t>(msg.point_num, msg.points.size());
+  if(num_points < 10){
+	  return nullptr;
+  }
+  const double blind2 = blind * blind;
+  const double max_range2 = max_range * max_range;
+
+  auto raw_points = std::make_shared<RawPoints>();
+  raw_points->points.reserve(num_points);
+  raw_points->times.reserve(num_points);
+  raw_points->intensities.reserve(num_points);
+
+  for (size_t i = 0; i < num_points; i++) {
+    const auto& pt = msg.points[i];
+    const auto tag = pt.tag & 0x30;
+    if (tag != 0x10 && tag != 0x00) {
+      continue;
+    }
+
+    if (!std::isfinite(pt.x) || !std::isfinite(pt.y) || !std::isfinite(pt.z)) {
+      continue;
+    }
+
+    const double range2 =
+      static_cast<double>(pt.x) * static_cast<double>(pt.x) +
+      static_cast<double>(pt.y) * static_cast<double>(pt.y) +
+      static_cast<double>(pt.z) * static_cast<double>(pt.z);
+    if (range2 <= blind2 || range2 >= max_range2) {
+      continue;
+    }
+
+    raw_points->points.emplace_back(pt.x, pt.y, pt.z, 1.0);
+    raw_points->times.emplace_back(static_cast<double>(pt.offset_time) * 1e-9);
+    raw_points->intensities.emplace_back(static_cast<double>(pt.reflectivity));
+  }
+
+  if (raw_points->points.empty()) {
+    spdlog::warn("no valid points in Livox custom point cloud");
+    return nullptr;
+  }
+
+  raw_points->stamp = to_sec(msg.header.stamp);
+  return raw_points;
+}
+
+static RawPoints::Ptr extract_raw_points(const LivoxCustomMsgConstPtr& msg, const double blind = 0.0, const double max_range = 100.0) {
+  return extract_raw_points(*msg, blind, max_range);
+}
+#endif
 
 static PointCloud2ConstPtr frame_to_pointcloud2(const std::string& frame_id, const double stamp, const gtsam_points::PointCloud& frame) {
   PointCloud2Ptr msg(new PointCloud2);
