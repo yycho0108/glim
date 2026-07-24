@@ -53,7 +53,7 @@
     // Points config
     "keep_raw_points": false,
     "points_msg_type": "livox_custom",
-    "livox_blind": 0.0,
+    "livox_blind": 0.6,
     "livox_max_range": 100.0,
     // IMU config
     "imu_time_offset": 0.0,
@@ -69,7 +69,7 @@
     "tf_time_offset": 1e-6,
     // Extension modules
     "extension_modules": [
-      "libmemory_monitor.so",
+      //"libmemory_monitor.so",
       //"libstandard_viewer.so",
       "librviz_viewer.so"
       // "libimu_validator.so"
@@ -85,10 +85,12 @@
       "depth": 1000
     },
     "points_qos": {
-      "profile": "sensor_data"
+      "profile": "sensor_data",
+      "durability": "volatile"
     },
     "image_qos": {
-      "profile": "sensor_data"
+      "profile": "sensor_data",
+      "durability": "volatile"
     }
   }
 }

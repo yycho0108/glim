@@ -40,10 +40,10 @@
     "so_name": "libodometry_estimation_gpu.so",
     // Initialization params
     "initialization_mode": "LOOSE",
-    "initialization_window_size": 1.0,
+    "initialization_window_size": 2.0,
     "init_pose_damping_scale": 1e10,
     // Optimization params
-    "smoother_lag": 5.0,
+    "smoother_lag": 0.5,
     "use_isam2_dogleg": false,
     "isam2_relinearize_skip": 1,
     "isam2_relinearize_thresh": 0.1,
@@ -59,7 +59,7 @@
     "full_connection_window_size": 2,
     // Keyframe params
     "keyframe_update_strategy": "OVERLAP",
-    "max_num_keyframes": 15,
+    "max_num_keyframes": 32,
     "keyframe_min_overlap": 0.01,
     "keyframe_max_overlap": 0.7,
     "keyframe_delta_trans": 2.0,

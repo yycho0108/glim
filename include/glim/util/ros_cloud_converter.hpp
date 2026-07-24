@@ -302,6 +302,16 @@ static RawPoints::Ptr extract_raw_points(const LivoxCustomMsg& msg, const double
   }
 
   raw_points->stamp = to_sec(msg.header.stamp);
+
+#if true
+  const auto max_dt = *std::max_element(raw_points->times.begin(),
+		  raw_points->times.end());
+  raw_points->stamp += max_dt;
+  for(auto& t : raw_points->times){
+	  t -= max_dt;
+  }
+
+#endif
   return raw_points;
 }
 
